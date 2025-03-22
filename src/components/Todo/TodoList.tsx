@@ -3,12 +3,12 @@ import TodoItem from './TodoItem';
 import TodoInput from './TodoInput';
 import { Card, Typography, Badge } from 'antd';
 import { UnorderedListOutlined } from '@ant-design/icons';
-import { Todo, TodoState } from '../../reducers/todoReducer';
+import { TodoState } from '../../reducers/todoReducer';
 
 const { Title } = Typography;
 
 function TodoList() {
-  const todos = useSelector((state: TodoState) => state.todos);
+  const todos = useSelector((state: { todo: TodoState }) => state.todo.todos);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -27,7 +27,7 @@ function TodoList() {
 
         {todos.length > 0 ? (
           <ul className="mt-6 space-y-3">
-            {todos.map((todo: Todo) => (
+            {todos.map((todo) => (
               <TodoItem key={todo.id} todo={todo} />
             ))}
           </ul>

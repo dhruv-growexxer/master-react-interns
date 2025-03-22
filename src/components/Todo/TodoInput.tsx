@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { addTodo } from '../../actions/todoActions';
+import { addTodo } from '../../features/todos/todoSlice';
 import { Input, Button, Form } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 

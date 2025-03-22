@@ -1,14 +1,10 @@
 import { useDispatch } from 'react-redux';
-import { toggleTodo, removeTodo } from '../../actions/todoActions';
 import { Checkbox, Button, Typography } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
+import { toggleTodo, removeTodo, Todo } from '../../features/todos/todoSlice';
 
 interface TodoItemProps {
-  todo: {
-    id: string;
-    text: string;
-    completed: boolean;
-  };
+  todo: Todo;
 }
 
 function TodoItem({ todo }: TodoItemProps) {
