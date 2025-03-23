@@ -1,14 +1,39 @@
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import TodoItem from './TodoItem';
 import TodoInput from './TodoInput';
-import { Card, Typography, Badge } from 'antd';
+import { Card, Typography, Badge, Spin } from 'antd';
 import { UnorderedListOutlined } from '@ant-design/icons';
-import { TodoState } from '../../reducers/todoReducer';
+import { fetchTodos } from '../../features/todos/todoSlice';
+import { RootState } from '../../app/store';
 
 const { Title } = Typography;
 
 function TodoList() {
-  const todos = useSelector((state: { todo: TodoState }) => state.todo.todos);
+  const dispatch = useDispatch();
+  const { todos, status, errors } = useSelector((state: RootState) => state.todo);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchTodos() as any);
+    }
+  }, [status, dispatch]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (status === 'failed' && errors['fetch']) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Error: {errors['fetch']}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
