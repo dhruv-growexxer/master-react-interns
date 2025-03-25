@@ -17,7 +17,9 @@ function TodoItem({ todo }: TodoItemProps) {
   const deleteError = errors[`delete_${todo.id}`];
 
   const handleToggle = async () => {
-    await dispatch(toggleTodoAsync({ id: todo.id, completed: todo.completed }) as any);
+    await dispatch(
+      toggleTodoAsync({ id: todo.id, completed: todo.completed, text: todo.text }) as any,
+    );
   };
 
   const handleDelete = async () => {

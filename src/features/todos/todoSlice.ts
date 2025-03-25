@@ -30,7 +30,7 @@ const initialState: TodoState = {
 export const fetchTodos = createAsyncThunk('todos/fetchTodos', async (_, { rejectWithValue }) => {
   try {
     const response = await axios.get('/todos?limit=5');
-    return response.data.todos.map((todo: any) => ({
+    return response.data.map((todo: any) => ({
       id: todo.id.toString(),
       text: todo.todo,
       completed: todo.completed,
@@ -44,10 +44,10 @@ export const addTodoAsync = createAsyncThunk(
   'todos/addTodoAsync',
   async (text: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/todos/add', {
+      const response = await axios.post('/todos', {
         todo: text,
         completed: false,
-        userId: 1,
+        id: Date.now().toString(),
       });
 
       return {
@@ -63,10 +63,15 @@ export const addTodoAsync = createAsyncThunk(
 
 export const toggleTodoAsync = createAsyncThunk(
   'todos/toggleTodoAsync',
-  async ({ id, completed }: { id: string; completed: boolean }, { rejectWithValue }) => {
+  async (
+    { id, completed, text }: { id: string; completed: boolean; text: string },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.put(`/todos/${id}`, {
         completed: !completed,
+        todo: text,
+        id,
       });
 
       console.log('Toggle API Response:', response.data);
