@@ -3,6 +3,7 @@ import { Checkbox, Button, Typography, Spin, Alert } from 'antd';
 import { DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
 import { toggleTodoAsync, deleteTodoAsync, Todo, clearError } from '../../features/todos/todoSlice';
 import { RootState } from '../../app/store';
+import EditTodoModal from './TodoEdit';
 
 interface TodoItemProps {
   todo: Todo;
@@ -41,6 +42,7 @@ function TodoItem({ todo }: TodoItemProps) {
       <Typography.Text className={`flex-1 ${todo.completed ? 'text-gray-400' : 'text-black'}`}>
         {todo.text}
       </Typography.Text>
+      <EditTodoModal todo={todo} />
       <Button
         type="text"
         danger
