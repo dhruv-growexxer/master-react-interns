@@ -1,7 +1,7 @@
 {
   "todos": [
     {
-      "completed": true,
+      "completed": false,
       "todo": "Learn React",
       "id": "1"
     },
@@ -11,9 +11,14 @@
       "id": "2"
     },
     {
-      "id": "1742866407606",
-      "todo": "Working fine?",
-      "completed": false
+      "completed": false,
+      "todo": "Learn Redux-toolkit",
+      "id": "1742995141095"
+    },
+    {
+      "completed": false,
+      "todo": "Learn Redux-toolkit with createAsyncThunk",
+      "id": "1742998656266"
     }
   ]
 }

@@ -1,8 +1,17 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Checkbox, Button, Typography, Spin, Alert } from 'antd';
-import { DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
-import { toggleTodoAsync, deleteTodoAsync, Todo, clearError } from '../../features/todos/todoSlice';
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  LoadingOutlined,
+  SaveOutlined,
+} from '@ant-design/icons';
+import { toggleTodoAsync, deleteTodoAsync, editTodoAsync } from '../../features/todos/todoThunks';
+import { clearError } from '../../features/todos/todoSlice';
+import { Todo } from '../../features/todos/todoTypes';
 import { RootState } from '../../app/store';
+import { useState } from 'react';
 
 interface TodoItemProps {
   todo: Todo;
@@ -16,6 +25,9 @@ function TodoItem({ todo }: TodoItemProps) {
   const toggleError = errors[todo.id];
   const deleteError = errors[`delete_${todo.id}`];
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(todo.text);
+
   const handleToggle = async () => {
     await dispatch(
       toggleTodoAsync({ id: todo.id, completed: todo.completed, text: todo.text }) as any,
@@ -24,6 +36,13 @@ function TodoItem({ todo }: TodoItemProps) {
 
   const handleDelete = async () => {
     await dispatch(deleteTodoAsync(todo.id) as any);
+  };
+
+  const handleEditSave = async () => {
+    if (newText.trim() && newText !== todo.text) {
+      await dispatch(editTodoAsync({ id: todo.id, text: newText }) as any);
+    }
+    setIsEditing(false);
   };
 
   return (
@@ -38,9 +57,31 @@ function TodoItem({ todo }: TodoItemProps) {
         onChange={handleToggle}
         disabled={isTogglingTodo || isDeletingTodo}
       />
-      <Typography.Text className={`flex-1 ${todo.completed ? 'text-gray-400' : 'text-black'}`}>
-        {todo.text}
-      </Typography.Text>
+      {isEditing ? (
+        <div className="flex-1">
+          <input
+            type="text"
+            value={newText}
+            onChange={(e) => setNewText(e.target.value)}
+            className="w-[78%] border border-gray-300 rounded px-2 py-1"
+          />
+          <Button onClick={handleEditSave} icon={<SaveOutlined />} className="ml-2" />
+          <Button onClick={() => setIsEditing(false)} icon={<CloseOutlined />} className="ml-2" />
+        </div>
+      ) : (
+        <Typography.Text className={`flex-1 ${todo.completed ? 'text-gray-400' : 'text-black'}`}>
+          {todo.text}
+        </Typography.Text>
+      )}
+      {!isEditing && (
+        <Button
+          type="text"
+          icon={<EditOutlined />}
+          onClick={() => setIsEditing(true)}
+          className="opacity-0 group-hover:opacity-100"
+          disabled={isTogglingTodo || isDeletingTodo}
+        />
+      )}
       <Button
         type="text"
         danger
