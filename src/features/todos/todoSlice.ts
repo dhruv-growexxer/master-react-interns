@@ -97,6 +97,40 @@ export const deleteTodoAsync = createAsyncThunk(
     }
   },
 );
+export const updateTodoAsync = createAsyncThunk(
+  'todos/updateTodoAsync',
+  async ({ id, text }: Pick<Todo, 'id' | 'text'>, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`/todos/${id}`, { todo: text });
+      return { id, text: response.data.todo };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update todo');
+    }
+  },
+);
+
+const createAsyncHandlers = (
+  thunk: any,
+  keyGenerator: (action: any) => string,
+  successHandler?: (state: TodoState, action: any) => void,
+) => ({
+  pending: (state: TodoState, action: any) => {
+    const key = keyGenerator(action);
+    state.loadingStates[key] = true;
+    delete state.errors[key];
+  },
+  fulfilled: (state: TodoState, action: any) => {
+    const key = keyGenerator(action);
+    state.loadingStates[key] = false;
+    delete state.errors[key];
+    if (successHandler) successHandler(state, action);
+  },
+  rejected: (state: TodoState, action: any) => {
+    const key = keyGenerator(action);
+    state.loadingStates[key] = false;
+    state.errors[key] = action.payload as string;
+  },
+});
 
 const todoSlice = createSlice({
   name: 'todo',
@@ -107,75 +141,74 @@ const todoSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Fetch Todos
+    const fetchHandlers = createAsyncHandlers(
+      fetchTodos,
+      () => 'fetch',
+      (state, action) => {
+        state.todos = action.payload;
+        state.status = 'succeeded';
+      },
+    );
     builder
-      // Fetch Todos
       .addCase(fetchTodos.pending, (state) => {
         state.status = 'loading';
-        state.loadingStates['fetch'] = true;
-        delete state.errors['fetch'];
+        fetchHandlers.pending(state, null);
       })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.todos = action.payload;
-        state.loadingStates['fetch'] = false;
-        delete state.errors['fetch'];
-      })
-      .addCase(fetchTodos.rejected, (state, action) => {
-        state.status = 'failed';
-        state.loadingStates['fetch'] = false;
-        state.errors['fetch'] = action.payload as string;
-      })
-      // Add Todo
-      .addCase(addTodoAsync.pending, (state) => {
-        state.loadingStates['add'] = true;
-        delete state.errors['add'];
-      })
-      .addCase(addTodoAsync.fulfilled, (state, action) => {
-        state.todos.push(action.payload);
-        state.loadingStates['add'] = false;
-        delete state.errors['add'];
-      })
-      .addCase(addTodoAsync.rejected, (state, action) => {
-        state.loadingStates['add'] = false;
-        state.errors['add'] = action.payload as string;
-      })
-      // Toggle Todo
-      .addCase(toggleTodoAsync.pending, (state, action) => {
-        const id = action.meta.arg.id;
-        state.loadingStates[id] = true;
-        delete state.errors[id];
-      })
-      .addCase(toggleTodoAsync.fulfilled, (state, action) => {
-        const todo = state.todos.find((todo) => todo.id === action.payload.id);
-        if (todo) {
-          todo.completed = action.payload.completed;
-        }
-        state.loadingStates[action.payload.id] = false;
-        delete state.errors[action.payload.id];
-      })
-      .addCase(toggleTodoAsync.rejected, (state, action) => {
-        const id = action.meta.arg.id;
-        state.loadingStates[id] = false;
-        state.errors[id] = action.payload as string;
-      })
-      // Delete Todo
-      .addCase(deleteTodoAsync.pending, (state, action) => {
-        const id = action.meta.arg;
-        state.loadingStates[`delete_${id}`] = true;
-        delete state.errors[`delete_${id}`];
-      })
-      .addCase(deleteTodoAsync.fulfilled, (state, action) => {
-        const id = action.payload;
-        state.todos = state.todos.filter((todo) => todo.id !== id);
-        state.loadingStates[`delete_${id}`] = false;
-        delete state.errors[`delete_${id}`];
-      })
-      .addCase(deleteTodoAsync.rejected, (state, action) => {
-        console.log(state, action);
-        const id = action.meta.arg;
-        state.loadingStates[`delete_${id}`] = false;
-        state.errors[`delete_${id}`] = action.payload as string;
-      });
+      .addCase(fetchTodos.fulfilled, fetchHandlers.fulfilled)
+      .addCase(fetchTodos.rejected, fetchHandlers.rejected);
+
+    // Add Todo
+    const addHandlers = createAsyncHandlers(
+      addTodoAsync,
+      () => 'add',
+      (state, action) => state.todos.push(action.payload),
+    );
+    builder
+      .addCase(addTodoAsync.pending, addHandlers.pending)
+      .addCase(addTodoAsync.fulfilled, addHandlers.fulfilled)
+      .addCase(addTodoAsync.rejected, addHandlers.rejected);
+
+    // Toggle Todo
+    const toggleHandlers = createAsyncHandlers(
+      toggleTodoAsync,
+      (action) => action.meta.arg.id,
+      (state, action) => {
+        const todo = state.todos.find((t) => t.id === action.payload.id);
+        if (todo) todo.completed = action.payload.completed;
+      },
+    );
+    builder
+      .addCase(toggleTodoAsync.pending, toggleHandlers.pending)
+      .addCase(toggleTodoAsync.fulfilled, toggleHandlers.fulfilled)
+      .addCase(toggleTodoAsync.rejected, toggleHandlers.rejected);
+
+    // Delete Todo
+    const deleteHandlers = createAsyncHandlers(
+      deleteTodoAsync,
+      (action) => `delete_${action.meta.arg}`,
+      (state, action) => {
+        state.todos = state.todos.filter((todo) => todo.id !== action.payload);
+      },
+    );
+    builder
+      .addCase(deleteTodoAsync.pending, deleteHandlers.pending)
+      .addCase(deleteTodoAsync.fulfilled, deleteHandlers.fulfilled)
+      .addCase(deleteTodoAsync.rejected, deleteHandlers.rejected);
+
+    // Update Todo
+    const updateHandlers = createAsyncHandlers(
+      updateTodoAsync,
+      (action) => `update_${action.meta.arg.id}`,
+      (state, action) => {
+        const todo = state.todos.find((t) => t.id === action.payload.id);
+        if (todo) todo.text = action.payload.text;
+      },
+    );
+    builder
+      .addCase(updateTodoAsync.pending, updateHandlers.pending)
+      .addCase(updateTodoAsync.fulfilled, updateHandlers.fulfilled)
+      .addCase(updateTodoAsync.rejected, updateHandlers.rejected);
   },
 });
 
