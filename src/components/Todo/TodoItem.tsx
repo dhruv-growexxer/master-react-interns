@@ -7,13 +7,9 @@ import {
   LoadingOutlined,
   SaveOutlined,
 } from '@ant-design/icons';
-import {
-  toggleTodoAsync,
-  deleteTodoAsync,
-  Todo,
-  clearError,
-  editTodoAsync,
-} from '../../features/todos/todoSlice';
+import { toggleTodoAsync, deleteTodoAsync, editTodoAsync } from '../../features/todos/todoThunks';
+import { clearError } from '../../features/todos/todoSlice';
+import { Todo } from '../../features/todos/todoTypes';
 import { RootState } from '../../app/store';
 import { useState } from 'react';
 

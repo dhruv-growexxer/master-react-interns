@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { addTodoAsync, clearError } from '../../features/todos/todoSlice';
+import { clearError } from '../../features/todos/todoSlice';
+import { addTodoAsync } from '../../features/todos/todoThunks';
 import { Input, Button, Form, Alert } from 'antd';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { RootState } from '../../app/store';
