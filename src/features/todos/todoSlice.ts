@@ -98,6 +98,25 @@ export const deleteTodoAsync = createAsyncThunk(
   },
 );
 
+export const editTodoAsync = createAsyncThunk(
+  'todos/editTodoAsync',
+  async ({ id, text }: { id: string; text: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`/todos/${id}`, {
+        todo: text,
+        id,
+      });
+
+      return {
+        id,
+        text: response.data.todo,
+      };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to edit todo');
+    }
+  },
+);
+
 const todoSlice = createSlice({
   name: 'todo',
   initialState,
@@ -175,6 +194,25 @@ const todoSlice = createSlice({
         const id = action.meta.arg;
         state.loadingStates[`delete_${id}`] = false;
         state.errors[`delete_${id}`] = action.payload as string;
+      })
+      // Edit Todo
+      .addCase(editTodoAsync.pending, (state, action) => {
+        const id = action.meta.arg.id;
+        state.loadingStates[`edit_${id}`] = true;
+        delete state.errors[`edit_${id}`];
+      })
+      .addCase(editTodoAsync.fulfilled, (state, action) => {
+        const todo = state.todos.find((todo) => todo.id === action.payload.id);
+        if (todo) {
+          todo.text = action.payload.text;
+        }
+        state.loadingStates[`edit_${action.payload.id}`] = false;
+        delete state.errors[`edit_${action.payload.id}`];
+      })
+      .addCase(editTodoAsync.rejected, (state, action) => {
+        const id = action.meta.arg.id;
+        state.loadingStates[`edit_${id}`] = false;
+        state.errors[`edit_${id}`] = action.payload as string;
       });
   },
 });
