@@ -6,9 +6,13 @@
       "id": "1"
     },
     {
-      "completed": false,
       "todo": "Learn Redux",
       "id": "2"
+    },
+    {
+      "completed": false,
+      "todo": "Learn Redux-toolkit",
+      "id": "1742995141095"
     }
   ]
 }
