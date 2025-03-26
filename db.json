@@ -1,0 +1,24 @@
+{
+  "todos": [
+    {
+      "completed": true,
+      "todo": "Learn React",
+      "id": "1"
+    },
+    {
+      "completed": true,
+      "todo": "Working fine?",
+      "id": "1742866407606"
+    },
+    {
+      "id": "1742991539267",
+      "todo": "123@123",
+      "completed": false
+    },
+    {
+      "id": "1742993959926",
+      "todo": "manav",
+      "completed": false
+    }
+  ]
+}
