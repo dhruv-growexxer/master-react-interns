@@ -5,7 +5,7 @@ import { API_URL } from '../../utils/constants';
 export default function UsersList() {
   const { data: users, loading, error } = useFetch<{ name: string }[]>(API_URL.USERS);
 
-  if (loading) return <Spin />;
+  if (loading) return <Spin data-testid="loading-spinner" />;
   if (error) return <p>Error: {error}</p>;
 
   return (
