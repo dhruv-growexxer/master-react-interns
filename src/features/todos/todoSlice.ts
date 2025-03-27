@@ -74,7 +74,6 @@ export const toggleTodoAsync = createAsyncThunk(
         id,
       });
 
-      console.log('Toggle API Response:', response.data);
       return {
         id,
         completed: !completed,
@@ -90,10 +89,33 @@ export const deleteTodoAsync = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await axios.delete(`/todos/${id}`);
-      console.log('Delete API Response:', response.data);
       return id;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete todo');
+    }
+  },
+);
+
+// ✅ New: Update Todo
+export const updateTodoAsync = createAsyncThunk(
+  'todos/updateTodoAsync',
+  async (
+    { id, text, completed }: { id: string; text: string; completed: boolean },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axios.put(`/todos/${id}`, {
+        todo: text,
+        completed,
+        id,
+      });
+
+      return {
+        id,
+        text: response.data.todo,
+      };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update todo');
     }
   },
 );
@@ -108,7 +130,6 @@ const todoSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Todos
       .addCase(fetchTodos.pending, (state) => {
         state.status = 'loading';
         state.loadingStates['fetch'] = true;
@@ -125,7 +146,6 @@ const todoSlice = createSlice({
         state.loadingStates['fetch'] = false;
         state.errors['fetch'] = action.payload as string;
       })
-      // Add Todo
       .addCase(addTodoAsync.pending, (state) => {
         state.loadingStates['add'] = true;
         delete state.errors['add'];
@@ -139,7 +159,6 @@ const todoSlice = createSlice({
         state.loadingStates['add'] = false;
         state.errors['add'] = action.payload as string;
       })
-      // Toggle Todo
       .addCase(toggleTodoAsync.pending, (state, action) => {
         const id = action.meta.arg.id;
         state.loadingStates[id] = true;
@@ -158,7 +177,6 @@ const todoSlice = createSlice({
         state.loadingStates[id] = false;
         state.errors[id] = action.payload as string;
       })
-      // Delete Todo
       .addCase(deleteTodoAsync.pending, (state, action) => {
         const id = action.meta.arg;
         state.loadingStates[`delete_${id}`] = true;
@@ -171,10 +189,30 @@ const todoSlice = createSlice({
         delete state.errors[`delete_${id}`];
       })
       .addCase(deleteTodoAsync.rejected, (state, action) => {
-        console.log(state, action);
         const id = action.meta.arg;
         state.loadingStates[`delete_${id}`] = false;
         state.errors[`delete_${id}`] = action.payload as string;
+      })
+
+      //Update reducers
+      .addCase(updateTodoAsync.pending, (state, action) => {
+        const id = action.meta.arg.id;
+        state.loadingStates[`update_${id}`] = true;
+        delete state.errors[`update_${id}`];
+      })
+      .addCase(updateTodoAsync.fulfilled, (state, action) => {
+        const { id, text } = action.payload;
+        const todo = state.todos.find((todo) => todo.id === id);
+        if (todo) {
+          todo.text = text;
+        }
+        state.loadingStates[`update_${id}`] = false;
+        delete state.errors[`update_${id}`];
+      })
+      .addCase(updateTodoAsync.rejected, (state, action) => {
+        const id = action.meta.arg.id;
+        state.loadingStates[`update_${id}`] = false;
+        state.errors[`update_${id}`] = action.payload as string;
       });
   },
 });
