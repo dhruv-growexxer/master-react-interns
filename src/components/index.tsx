@@ -16,7 +16,6 @@ export default function Components() {
   const { count } = useTheme();
   return (
     <>
-      <h1>Components & Hooks count: {count}</h1>
       {/* <Small /> */}
       {/* <RenderCycle /> */}
       {/* <WithoutUseMemo /> */}
