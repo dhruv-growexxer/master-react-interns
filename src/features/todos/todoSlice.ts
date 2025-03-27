@@ -96,7 +96,6 @@ export const deleteTodoAsync = createAsyncThunk(
   },
 );
 
-// ✅ New: Update Todo
 export const updateTodoAsync = createAsyncThunk(
   'todos/updateTodoAsync',
   async (
@@ -194,7 +193,6 @@ const todoSlice = createSlice({
         state.errors[`delete_${id}`] = action.payload as string;
       })
 
-      //Update reducers
       .addCase(updateTodoAsync.pending, (state, action) => {
         const id = action.meta.arg.id;
         state.loadingStates[`update_${id}`] = true;
