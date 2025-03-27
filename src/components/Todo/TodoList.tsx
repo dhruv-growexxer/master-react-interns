@@ -4,8 +4,8 @@ import TodoItem from './TodoItem';
 import TodoInput from './TodoInput';
 import { Card, Typography, Badge, Spin } from 'antd';
 import { UnorderedListOutlined } from '@ant-design/icons';
-import { fetchTodos } from '../../features/todos/todoSlice';
-import { RootState } from '../../app/store';
+import { RootState } from '../../store';
+import { fetchTodos } from '../../store/thunk/fetchTodo';
 
 const { Title } = Typography;
 
